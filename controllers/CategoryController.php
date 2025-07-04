@@ -1,19 +1,19 @@
 <?php 
 
-require(__DIR__ . "/../models/Article.php");
+require(__DIR__ . "/../models/Category.php");
 require(__DIR__ . "/../connection/connection.php");
-require(__DIR__ . "/../services/ArticleService.php");
+require(__DIR__ . "/../services/CategoryService.php");
 require(__DIR__ . "/../services/ResponseService.php");
 
-class ArticleController{
+class CategoryController{
     
-    public function getAllArticles(){
+    public function getAllCategories(){
         global $mysqli;
 
         if(!isset($_GET["id"])){
-            $articles = Article::all($mysqli);
-            $articles_array = ArticleService::articlesToArray($articles); 
-            echo ResponseService::success_response($articles_array);
+            $categories = Article::all($mysqli);
+            $categories_array = CategoryService::categoriesToArray($categories); 
+            echo ResponseService::success_response($categories_array);
             return;
         }
 
@@ -23,16 +23,11 @@ class ArticleController{
         return;
     }
 
-    public function deleteAllArticles(){
+    
+
+    public function updateCategories(){
         global $mysqli;
-        Article::deleteAll($mysqli);
-    }
-
-
-
-    public function updateArticles(){
-        global $mysqli;
-        $colNames = ["name", "author", "description"];
+        $colNames = ["name"];
         if(!isset($_POST["id"])){
             //error
         }
@@ -46,21 +41,21 @@ class ArticleController{
         if(sizeof($values) == 0){
             //error
         }
-        Article::update($mysqli,$values, $_POST["id"]);
+        Category::update($mysqli,$values, $_POST["id"]);
     }
 
-    public static function deleteArticle(){
+    public static function deleteAllCategories(){
         global $mysqli;
         if(!isset($_GET["id"])){
-            //error
+            Category::deleteAll($mysqli);
         }
-        Article::delete($mysqli, $_GET["id"]);
+        Category::delete($mysqli, $_GET["id"]);
     }
 
-    public static function createArticle(){
+    public static function createCategory(){
         global $mysqli;
         $values = [];
-        $colNames = ["name", "author", "description"];
+        $colNames = ["name"];
         foreach($colNames as $value){
             if(!in_array($value, $_POST)){
                 //error
@@ -68,7 +63,7 @@ class ArticleController{
             }
         }
         if(isset($_POST["id"])){
-            if(Article::find($mysqli, $_POST["id"]) != null){
+            if(Category::find($mysqli, $_POST["id"]) != null){
                 //error
                 return;
             }
@@ -77,19 +72,13 @@ class ArticleController{
             }
         }
         
+        
         foreach($_POST as $key=>$value){
-            if(in_array($key, $colNames)){
+            if(in_array($key, $colNames) ){
                 $values[$key] = $value;
             }
         }
-        Article::create($mysqli, $values);
+        Category::create($mysqli, $values);
 
     }
 }
-
-//To-Do:
-
-//1- Try/Catch in controllers ONLY!!! 
-//2- Find a way to remove the hard coded response code (from ResponseService.php)
-//3- Include the routes file (api.php) in the (index.php) -- In other words, seperate the routing from the index (which is the engine)
-//4- Create a BaseController and clean some imports 

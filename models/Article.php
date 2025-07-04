@@ -9,6 +9,7 @@ class Article extends Model{
     private string $description; 
     
     protected static string $table = "articles";
+    protected static string $primary_key = "id";
 
     public function __construct(array $data){
         $this->id = $data["id"];
