@@ -9,5 +9,3 @@ $query = "CREATE Table Categories(
 $execute = $mysqli->prepare($query);
 $execute->execute();
 
-
-//INSERT INTO `categories` (`id`, `name`) VALUES (NULL, 'Educational'), (NULL, 'Entertainment'), (NULL, 'Technology'), (NULL, 'Research'), (NULL, 'News');

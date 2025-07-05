@@ -6,10 +6,9 @@ require(__DIR__ . "/../services/CategoryService.php");
 require(__DIR__ . "/../services/ResponseService.php");
 
 class CategoryController{
-    
     public function getAllCategories(){
         global $mysqli;
-
+        
         if(!isset($_GET["id"])){
             $categories = Article::all($mysqli);
             $categories_array = CategoryService::categoriesToArray($categories); 
@@ -29,7 +28,8 @@ class CategoryController{
         global $mysqli;
         $colNames = ["name"];
         if(!isset($_POST["id"])){
-            //error
+            echo ResponseService::not_found($_GET["id"]);
+            return;
         }
         $values = [];
         foreach($_POST as $key => $value){
@@ -39,7 +39,7 @@ class CategoryController{
             }
         }
         if(sizeof($values) == 0){
-            //error
+            echo ResponseService::error_message("no values to update");
         }
         Category::update($mysqli,$values, $_POST["id"]);
     }
@@ -48,8 +48,16 @@ class CategoryController{
         global $mysqli;
         if(!isset($_GET["id"])){
             Category::deleteAll($mysqli);
+            echo ResponseService::no_response();
+            return;
+        }
+        $category = Category::find($mysqli, $_GET["id"]);
+        if($category == null){
+            echo ResponseService::not_found($_GET["id"]);
+            return;
         }
         Category::delete($mysqli, $_GET["id"]);
+        echo ResponseService::no_response();
     }
 
     public static function createCategory(){
@@ -58,13 +66,13 @@ class CategoryController{
         $colNames = ["name"];
         foreach($colNames as $value){
             if(!in_array($value, $_POST)){
-                //error
+                echo ResponseService::error_message("not enough values to create object");
                 return;
             }
         }
         if(isset($_POST["id"])){
             if(Category::find($mysqli, $_POST["id"]) != null){
-                //error
+                echo ResponseService::error_message("id already exists");
                 return;
             }
             else{
@@ -79,6 +87,7 @@ class CategoryController{
             }
         }
         Category::create($mysqli, $values);
+        echo ResponseService::created($values);
 
     }
 }

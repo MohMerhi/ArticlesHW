@@ -4,6 +4,7 @@ require(__DIR__ . "/../models/Article.php");
 require(__DIR__ . "/../connection/connection.php");
 require(__DIR__ . "/../services/ArticleService.php");
 require(__DIR__ . "/../services/ResponseService.php");
+require(__DIR__."/BaseController.php");
 
 class ArticleController{
     
@@ -18,14 +19,30 @@ class ArticleController{
         }
 
         $id = $_GET["id"];
-        $article = Article::find($mysqli, $id)->toArray();
+        $article = Article::find($mysqli, $id);
+        if($article == null){
+            echo ResponseService::not_found($id);
+            return;
+        }
         echo ResponseService::success_response($article);
         return;
     }
 
     public function deleteAllArticles(){
         global $mysqli;
-        Article::deleteAll($mysqli);
+        if(!isset($_GET["id"])){
+            Article::deleteAll($mysqli);
+            echo ResponseService::no_response();
+            return;
+        }
+        $article = Article::find($mysqli, $_GET["id"]);
+        if($article == null){
+            echo ResponseService::not_found($_GET["id"]);
+            return;
+        }
+        Article::delete($mysqli, $_GET["id"]);
+        echo ResponseService::no_response();
+        
     }
 
 
@@ -34,7 +51,8 @@ class ArticleController{
         global $mysqli;
         $colNames = ["name", "author", "description"];
         if(!isset($_POST["id"])){
-            //error
+            echo ResponseService::not_found($_GET["id"]);
+            return;
         }
         $values = [];
         foreach($_POST as $key => $value){
@@ -44,18 +62,12 @@ class ArticleController{
             }
         }
         if(sizeof($values) == 0){
-            //error
+            echo ResponseService::error_message("no values to update");
         }
         Article::update($mysqli,$values, $_POST["id"]);
+        echo ResponseService::OK();
     }
 
-    public static function deleteArticle(){
-        global $mysqli;
-        if(!isset($_GET["id"])){
-            //error
-        }
-        Article::delete($mysqli, $_GET["id"]);
-    }
 
     public static function createArticle(){
         global $mysqli;
@@ -63,13 +75,13 @@ class ArticleController{
         $colNames = ["name", "author", "description"];
         foreach($colNames as $value){
             if(!in_array($value, $_POST)){
-                //error
+                echo ResponseService::error_message("not enough values to create object");
                 return;
             }
         }
         if(isset($_POST["id"])){
             if(Article::find($mysqli, $_POST["id"]) != null){
-                //error
+                echo ResponseService::error_message("id already exists");
                 return;
             }
             else{
@@ -78,11 +90,12 @@ class ArticleController{
         }
         
         foreach($_POST as $key=>$value){
-            if(in_array($key, $colNames)){
+            if(in_array($key, $colNames) && $key != "id"){
                 $values[$key] = $value;
             }
         }
         Article::create($mysqli, $values);
+        echo ResponseService::created($values);
 
     }
 }
