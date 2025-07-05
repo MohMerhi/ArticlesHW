@@ -19,7 +19,7 @@ class ArticleController{
         }
 
         $id = $_GET["id"];
-        $article = Article::find($mysqli, $id);
+        $article = Article::find($mysqli, $id)->toArray();
         if($article == null){
             echo ResponseService::not_found($id);
             return;
@@ -27,6 +27,8 @@ class ArticleController{
         echo ResponseService::success_response($article);
         return;
     }
+
+    
 
     public function deleteAllArticles(){
         global $mysqli;

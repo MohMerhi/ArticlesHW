@@ -13,9 +13,13 @@ abstract class Model{
         $query->bind_param("i", $id);
         $query->execute();
 
-        $data = $query->get_result()->fetch_assoc();
+        $data = $query->get_result();
+        $objects = [];
+        while($row = $data->fetch_assoc()){
+            $objects[] = new static($row); //creating an object of type "static" / "parent" and adding the object to the array
+        }
 
-        return $data ? new static($data) : null;
+        return sizeof($objects) > 0? (sizeof($objects) == 1 ? $objects[0]: $objects) : null;
     }
 
     public static function all(mysqli $mysqli){
@@ -106,6 +110,5 @@ abstract class Model{
     //2- create() -> static function
     //3- delete() -> static function 
 }
-
 
 
